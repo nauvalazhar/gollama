@@ -1,0 +1,114 @@
+/* Override prism theme colors for dark mode */
+:root {
+  --prism-background: transparent;
+  --prism-comment: #888888;
+  --prism-string: #a5d6ff;
+  --prism-literal: #85e89d;
+  --prism-keyword: #ff7b72;
+  --prism-function: #d2a8ff;
+  --prism-deleted: #ffdcd7;
+  --prism-class: #ff7b72;
+  --prism-builtin: #ffa657;
+  --prism-property: #79c0ff;
+  --prism-namespace: #ff7b72;
+  --prism-punctuation: #c9d1d9;
+  --prism-decorator: #f8f8f2;
+  --prism-operator: #79c0ff;
+  --prism-number: #79c0ff;
+  --prism-boolean: #ff7b72;
+  --prism-variable: #ffa657;
+  --prism-regex: #f2cc60;
+  --prism-json-property: #79c0ff;
+  --prism-line-highlight: #6e7681;
+  --prism-line-number: #6e7681;
+}
+
+.prose pre {
+  background-color: var(--prism-background) !important;
+}
+
+.prose pre > code {
+  display: grid;
+  background-color: transparent !important;
+}
+
+/* Line Numbers */
+.prose pre[data-line-numbers] {
+  padding-left: 3.8em;
+  counter-reset: line;
+}
+
+.prose pre[data-line-numbers] > code {
+  counter-reset: line;
+}
+
+.prose pre[data-line-numbers] > code > .line::before {
+  counter-increment: line;
+  content: counter(line);
+  position: absolute;
+  left: -2.8em;
+  width: 2em;
+  text-align: right;
+  color: var(--prism-line-number);
+}
+
+/* Line Highlight */
+.prose pre .line-highlight {
+  background-color: var(--prism-line-highlight);
+}
+
+/* Token Colors */
+.prose pre .token.comment,
+.prose pre .token.prolog,
+.prose pre .token.doctype,
+.prose pre .token.cdata {
+  color: var(--prism-comment);
+}
+
+.prose pre .token.string {
+  color: var(--prism-string);
+}
+
+.prose pre .token.punctuation {
+  color: var(--prism-punctuation);
+}
+
+.prose pre .token.function {
+  color: var(--prism-function);
+}
+
+.prose pre .token.keyword {
+  color: var(--prism-keyword);
+}
+
+.prose pre .token.operator {
+  color: var(--prism-operator);
+}
+
+.prose pre .token.number {
+  color: var(--prism-number);
+}
+
+.prose pre .token.boolean {
+  color: var(--prism-boolean);
+}
+
+.prose pre .token.property {
+  color: var(--prism-property);
+}
+
+.prose pre .token.class-name {
+  color: var(--prism-class);
+}
+
+.prose pre .token.constant {
+  color: var(--prism-literal);
+}
+
+.prose pre .token.symbol {
+  color: var(--prism-builtin);
+}
+
+.prose pre .token.namespace {
+  color: var(--prism-namespace);
+} 
