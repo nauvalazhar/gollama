@@ -1,43 +1,64 @@
 'use client';
 
 import { Editor } from '@/components/editor/editor';
+import { cn } from '@/lib/utils';
+import { ChatRequestOptions } from 'ai';
 import { FormEvent, useState, useRef } from 'react';
 
 export function ChatForm({
-  onHeightChange,
-  ...props
+  handleSubmit,
+  input,
+  setInput,
 }: React.HTMLAttributes<HTMLFormElement> & {
-  onHeightChange: (height: number) => void;
+  handleSubmit: (
+    event?: {
+      preventDefault?: () => void;
+    },
+    chatRequestOptions?: ChatRequestOptions
+  ) => void;
+  input: string;
+  setInput: (input: string) => void;
 }) {
-  const [content, setContent] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+  const [editorHeight, setEditorHeight] = useState(0);
+
+  const handleHeightChange = (height: number) => {
+    setEditorHeight(height);
+  };
+
   const handleChange = (markdown: string) => {
-    setContent(markdown);
+    setInput(markdown);
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmitForm = (e: FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!input.trim()) return;
 
-    console.log('Submitted:', content);
-    // Handle the submission here (e.g., send to API)
-    setContent('');
+    handleSubmit(undefined);
+    setInput('');
   };
 
-  const handleEnter = (e: KeyboardEvent) => {
+  const handleEnter = (e: KeyboardEvent, clear: () => void) => {
     const form = formRef.current;
     form?.requestSubmit();
+    clear();
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} {...props}>
-      <Editor
-        onChange={handleChange}
-        onHeightChange={onHeightChange}
-        onEnter={handleEnter}
-        placeholder="Ask AI anything..."
-        initialContent={content}
-      />
-    </form>
+    <>
+      <div style={{ height: editorHeight + 20 }} className="flex-shrink-0" />
+      <div
+        className={cn('absolute left-0 bottom-4 w-full', 'flex justify-center')}
+      >
+        <form ref={formRef} onSubmit={handleSubmitForm} className="w-4xl">
+          <Editor
+            onChange={handleChange}
+            onHeightChange={handleHeightChange}
+            onEnter={handleEnter}
+            placeholder="Ask AI anything..."
+          />
+        </form>
+      </div>
+    </>
   );
 }

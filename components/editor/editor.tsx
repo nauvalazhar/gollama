@@ -40,17 +40,17 @@ import { Kbd } from '@/components/ui/kbd';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 interface EditorProps {
-  initialContent?: string;
+  content?: string;
   placeholder?: string;
   onChange?: (markdown: string) => void;
-  onEnter?: (event: KeyboardEvent) => void;
+  onEnter?: (event: KeyboardEvent, clear: () => void) => void;
   onHeightChange?: (height: number) => void;
 }
 
 export function Editor({
-  onChange,
-  initialContent = '',
+  content,
   placeholder = 'Ask a question...',
+  onChange,
   onEnter,
   onHeightChange,
 }: EditorProps) {
@@ -76,7 +76,7 @@ export function Editor({
       }),
       Highlight,
     ],
-    content: initialContent,
+    content,
     onUpdate: ({ editor }) => {
       const markdown = editor.storage.markdown.getMarkdown();
       onChange?.(markdown);
@@ -91,7 +91,9 @@ export function Editor({
           // if ctrl + enter, submit
           if (event.ctrlKey && event.key === 'Enter') {
             event.preventDefault();
-            onEnter?.(event);
+            onEnter?.(event, () => {
+              editor?.commands.clearContent(true);
+            });
           }
         },
       },

@@ -55,27 +55,25 @@ export function ChatBubble({
 
 interface ChatBubbleAvatarProps {
   src?: string;
-  fallback: string;
+  alt?: string;
+  fallback?: React.ReactNode;
   className?: string;
 }
 
 export function ChatBubbleAvatar({
   src,
+  alt,
   fallback,
   className,
 }: ChatBubbleAvatarProps) {
   return (
     <div
       className={cn(
-        'h-8 w-8 rounded-full bg-white/10 flex items-center justify-center chat-bubble-avatar flex-shrink-0',
+        'size-10 rounded-full bg-white/10 flex items-center justify-center chat-bubble-avatar flex-shrink-0',
         className
       )}
     >
-      {src ? (
-        <img src={src} alt={fallback} className="rounded-full" />
-      ) : (
-        <span className="text-xs font-medium">{fallback}</span>
-      )}
+      {src ? <img src={src} alt={alt} className="rounded-full" /> : fallback}
     </div>
   );
 }
@@ -105,7 +103,11 @@ interface ChatBubbleContentProps {
 export function ChatBubbleContent({ children }: ChatBubbleContentProps) {
   return (
     <div className="chat-bubble-content">
-      <Markdown content={children as string} />
+      {typeof children === 'string' ? (
+        <Markdown content={children} />
+      ) : (
+        children
+      )}
     </div>
   );
 }
