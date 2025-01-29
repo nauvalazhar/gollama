@@ -1,9 +1,11 @@
 import { streamText } from 'ai';
 import { ollama } from 'ollama-ai-provider';
+import { openai } from '@ai-sdk/openai';
 
 export const maxDuration = 30;
 
 const model = ollama('llama3.2');
+// const model = openai('gpt-4o');
 
 export async function POST(req: Request) {
   const { messages } = await req.json();

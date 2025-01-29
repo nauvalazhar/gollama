@@ -1,21 +1,15 @@
 'use client';
 
 import {
-  Bookmark,
   Bot,
-  ChevronDown,
   Copy,
-  Download,
   Info,
   Loader,
   Maximize2,
-  MoreVertical,
   Pencil,
   Quote,
   RefreshCw,
-  ThumbsDown,
-  ThumbsUp,
-  Trash,
+  ArrowDown,
 } from 'lucide-react';
 import {
   ChatBubble,
@@ -28,56 +22,23 @@ import {
   ChatBubbleTools,
 } from './chat-bubble';
 import { ChatForm } from './chat-form';
-import { useEffect, useRef, useState } from 'react';
 import { useChat } from 'ai/react';
 import { ChatHeader } from './chat-header';
+import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function Chat() {
-  const chatContainerRef = useRef<HTMLDivElement>(null);
-  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [chatContainerRef, endRef, isAtBottom] =
+    useScrollToBottom<HTMLDivElement>();
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     api: '/api/chat',
-    onFinish: () => {
-      // Scroll to bottom after response finishes
-      setTimeout(() => {
-        chatContainerRef.current?.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
-          behavior: 'smooth',
-        });
-      }, 100);
-    },
+    onFinish: () => {},
   });
 
-  // Scroll to bottom whenever messages change
-  useEffect(() => {
-    chatContainerRef.current?.scrollTo({
-      top: chatContainerRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, [messages]);
-
-  // Show/hide scroll button based on scroll position
-  useEffect(() => {
-    const container = chatContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-      setShowScrollButton(!isNearBottom);
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const scrollToBottom = () => {
-    chatContainerRef.current?.scrollTo({
-      top: chatContainerRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -86,7 +47,8 @@ export function Chat() {
         onModelChange={(value) => console.log('Model changed:', value)}
         onTitleChange={(value) => console.log(value)}
       />
-      <div ref={chatContainerRef} className="h-full overflow-y-auto pt-6">
+
+      <div ref={chatContainerRef} className="overflow-y-auto h-full">
         <div className="flex flex-col gap-10 max-w-3xl mx-auto">
           {messages.map((message, index) => (
             <ChatBubble
@@ -109,13 +71,6 @@ export function Chat() {
                       <ChatBubbleTools>
                         <ChatBubbleTool label="Quote this response">
                           <Quote />
-                        </ChatBubbleTool>
-                        <ChatBubbleDivider />
-                        <ChatBubbleTool label="Good response">
-                          <ThumbsUp />
-                        </ChatBubbleTool>
-                        <ChatBubbleTool label="Bad response">
-                          <ThumbsDown />
                         </ChatBubbleTool>
                         <ChatBubbleDivider />
                         <ChatBubbleTool label="Regenerate response">
@@ -163,18 +118,9 @@ export function Chat() {
               AI can make mistakes. Always verify information.
             </p>
           )}
+          <div ref={endRef} />
         </div>
       </div>
-      {showScrollButton && (
-        <Button
-          variant="outline"
-          size="icon"
-          className="fixed bottom-24 right-8 rounded-full z-20"
-          onClick={scrollToBottom}
-        >
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      )}
       <ChatForm handleSubmit={handleSubmit} input={input} setInput={setInput} />
     </section>
   );

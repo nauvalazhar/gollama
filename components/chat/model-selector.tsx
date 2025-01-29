@@ -19,7 +19,7 @@ interface ModelSelectorProps {
 }
 
 export function ModelSelector({
-  defaultValue = 'gpt-4',
+  defaultValue = 'ollama',
   onChange,
 }: ModelSelectorProps) {
   const [value, setValue] = useState(defaultValue);
@@ -42,7 +42,7 @@ export function ModelSelector({
         <DropdownMenuLabel>AI Models</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuRadioGroup value={value} onValueChange={handleValueChange}>
-          <DropdownMenuRadioItem value="gpt-4">GPT-4</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="ollama">Ollama</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="gpt-3.5-turbo">
             GPT-3.5 Turbo
           </DropdownMenuRadioItem>

@@ -125,13 +125,13 @@ export function ChatBubbleTools({
     <div
       className={cn(
         'flex items-center gap-4',
-        'border-t mt-6 pt-6',
         '*:opacity-40',
         'group-hover/bubble:*:opacity-100',
         '*:transition-opacity *:duration-300',
         'transition-all duration-300',
-        floating &&
-          'absolute -bottom-8 opacity-0 group-hover/bubble:-bottom-6 group-hover/bubble:opacity-100'
+        floating
+          ? 'absolute -bottom-8 opacity-0 group-hover/bubble:-bottom-6 group-hover/bubble:opacity-100 pt-2'
+          : 'border-t mt-4 pt-6'
       )}
     >
       {children}

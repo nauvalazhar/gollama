@@ -48,6 +48,7 @@ export function Sidebar({
       <div
         className={cn(
           'bg-background transition-all duration-150 ease-in-out',
+          'flex flex-col',
           'w-(--sidebar-second-width)',
           collapse && '-translate-x-full'
         )}
