@@ -25,16 +25,38 @@ import { ChatForm } from './chat-form';
 import { useChat } from 'ai/react';
 import { ChatHeader } from './chat-header';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Message } from 'ai';
+import { generateUUID } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 
-export function Chat() {
+export function Chat({
+  id,
+  initialMessages,
+  title,
+}: {
+  id: string;
+  initialMessages: Message[];
+  title?: string;
+}) {
+  const { mutate } = useSWRConfig();
+  const router = useRouter();
   const [chatContainerRef, endRef, isAtBottom] =
     useScrollToBottom<HTMLDivElement>();
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
+    id,
+    body: {
+      id,
+    },
+    initialMessages,
+    generateId: generateUUID,
+    sendExtraMessageFields: true,
     api: '/api/chat',
-    onFinish: () => {},
+    onResponse: () => {
+      router.push(`/chat/${id}`);
+      mutate('/api/chat/history');
+    },
   });
 
   const scrollToBottom = () => {
@@ -44,11 +66,12 @@ export function Chat() {
   return (
     <section className="flex flex-col h-full relative">
       <ChatHeader
+        title={title}
         onModelChange={(value) => console.log('Model changed:', value)}
         onTitleChange={(value) => console.log(value)}
       />
 
-      <div ref={chatContainerRef} className="overflow-y-auto h-full">
+      <div ref={chatContainerRef} className="overflow-y-auto h-full py-6">
         <div className="flex flex-col gap-10 max-w-3xl mx-auto">
           {messages.map((message, index) => (
             <ChatBubble

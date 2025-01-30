@@ -25,7 +25,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookie = await cookies();
-  const sidebarCollapsed = cookie.get('sidebarCollapsed')?.value === 'true';
+  const sidebarDocked = cookie.get('sidebarDocked')?.value === 'true';
 
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
@@ -33,7 +33,7 @@ export default async function RootLayout({
         className={`${fontSans.variable} ${fontMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <MainLayout sidebarFromCookie={sidebarCollapsed}>{children}</MainLayout>
+        <MainLayout sidebarFromCookie={sidebarDocked}>{children}</MainLayout>
       </body>
     </html>
   );

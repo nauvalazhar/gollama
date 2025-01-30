@@ -28,21 +28,28 @@ import {
 interface ChatHeaderProps {
   onModelChange?: (value: string) => void;
   onTitleChange?: (value: string) => void;
+  title?: string;
 }
 
-export function ChatHeader({ onModelChange, onTitleChange }: ChatHeaderProps) {
+export function ChatHeader({
+  onModelChange,
+  onTitleChange,
+  title,
+}: ChatHeaderProps) {
   return (
     <header className="flex items-center py-2 px-6 border-b border-border">
       <div className="w-4/12">
         <ModelSelector onChange={(value) => onModelChange?.(value)} />
       </div>
       <div className="w-4/12 flex items-center">
-        <EditableText
-          as="h1"
-          value="What is React Server Components?"
-          onSubmit={(value) => onTitleChange?.(value)}
-          className="font-semibold text-center text-lg"
-        />
+        {title && (
+          <EditableText
+            as="h1"
+            value={title}
+            onSubmit={(value) => onTitleChange?.(value)}
+            className="font-semibold text-center text-lg"
+          />
+        )}
       </div>
       <div className="w-4/12">
         <div className="flex items-center gap-2 justify-end">

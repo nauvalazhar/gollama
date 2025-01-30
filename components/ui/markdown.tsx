@@ -4,6 +4,8 @@ import React, { memo } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { cn } from '@/lib/utils';
+import rehypeHighlight from 'rehype-highlight';
+import 'highlight.js/styles/github-dark.css';
 
 const components: Partial<Components> = {
   pre: ({ children, className, node, ...props }) => {
@@ -22,7 +24,10 @@ const components: Partial<Components> = {
   },
   code: ({ className, children, node, ...props }) => {
     return (
-      <code className={cn(className)} {...props}>
+      <code
+        className={cn('break-all whitespace-pre-wrap', className)}
+        {...props}
+      >
         {children}
       </code>
     );
@@ -31,6 +36,7 @@ const components: Partial<Components> = {
 };
 
 const remarkPlugins = [remarkGfm];
+const rehypePlugins = [rehypeHighlight];
 
 interface MarkdownProps {
   content: string;
@@ -45,6 +51,7 @@ function NonMemoizedMarkdown({ content, className }: MarkdownProps) {
         className
       )}
       remarkPlugins={remarkPlugins}
+      rehypePlugins={rehypePlugins}
       components={components}
     >
       {content}

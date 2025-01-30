@@ -1,116 +1,90 @@
 'use client';
 
-import { useState } from 'react';
-import { Bot, ChevronLeft, ChevronRight, PlusIcon, Search } from 'lucide-react';
+import { createContext, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { SearchButton } from '@/components/command/search-button';
 
-export function Sidebar({
-  handleCollapse,
-  collapse,
+export const SidebarContext = createContext({
+  dock: false,
+});
+
+export const useSidebar = () => useContext(SidebarContext);
+
+export function SidebarProvider({
+  children,
+  value,
 }: {
-  handleCollapse: () => void;
-  collapse: boolean;
+  children: React.ReactNode;
+  value: { dock: boolean };
 }) {
   return (
-    <aside className="flex h-full">
+    <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
+  );
+}
+
+export function Sidebar({ children }: { children: React.ReactNode }) {
+  return (
+    <aside className="flex fixed top-0 left-0 h-full z-10 group/sidebar">
       <div
         className={cn(
-          'w-(--sidebar-first-width) bg-background z-10 flex flex-col items-center py-4',
-          !collapse && 'border-r border-border'
+          'w-(--sidebar-first-width) bg-background flex flex-col items-center py-4'
         )}
       >
-        <div
-          className={cn(
-            'flex items-center justify-center size-12 rounded-2xl',
-            'bg-white/10'
-          )}
-        >
-          <Bot className="size-6" />
-        </div>
-        <Button
-          onClick={handleCollapse}
-          aria-label={collapse ? 'Expand sidebar' : 'Collapse sidebar'}
-          variant="outline"
-          size="icon"
-          className="mt-auto"
-        >
-          {collapse ? (
-            <ChevronRight className="size-4" />
-          ) : (
-            <ChevronLeft className="size-4" />
-          )}
-        </Button>
-      </div>
-
-      <div
-        className={cn(
-          'bg-background transition-all duration-150 ease-in-out',
-          'flex flex-col',
-          'w-(--sidebar-second-width)',
-          collapse && '-translate-x-full'
-        )}
-      >
-        <SidebarHeader>
-          <SidebarTitle>Chat History</SidebarTitle>
-          <SearchButton />
-        </SidebarHeader>
-        <div className="px-4">
-          <Button className="w-full py-5" asChild>
-            <Link href="/">
-              <PlusIcon className="size-4" />
-              New chat
-            </Link>
-          </Button>
-        </div>
-        <div className="overflow-y-auto px-4 h-full mt-6">
-          <SidebarSubtitle>Today</SidebarSubtitle>
-          <SidebarList>
-            <SidebarItem active>What is React Server Components?</SidebarItem>
-            <SidebarItem>How to optimize Next.js performance?</SidebarItem>
-            <SidebarItem>Explain TypeScript generics with examples</SidebarItem>
-          </SidebarList>
-
-          <SidebarSubtitle>Yesterday</SidebarSubtitle>
-          <SidebarList>
-            <SidebarItem>Best practices for React hooks</SidebarItem>
-            <SidebarItem>Compare Tailwind vs CSS Modules</SidebarItem>
-            <SidebarItem>Building accessible React components</SidebarItem>
-            <SidebarItem>State management in modern React</SidebarItem>
-          </SidebarList>
-
-          <SidebarSubtitle>Previous 7 Days</SidebarSubtitle>
-          <SidebarList>
-            <SidebarItem>Implementing dark mode with Tailwind</SidebarItem>
-            <SidebarItem>Using the App Router in Next.js 13+</SidebarItem>
-            <SidebarItem>Debugging memory leaks in React</SidebarItem>
-            <SidebarItem>Setting up CI/CD for Next.js projects</SidebarItem>
-          </SidebarList>
-
-          <SidebarSubtitle>Older</SidebarSubtitle>
-          <SidebarList>
-            <SidebarItem>Authentication patterns in Next.js</SidebarItem>
-            <SidebarItem>Optimizing React component re-renders</SidebarItem>
-            <SidebarItem>Working with WebSockets in Next.js</SidebarItem>
-            <SidebarItem>Implementing infinite scroll</SidebarItem>
-            <SidebarItem>Building a custom React hook</SidebarItem>
-            <SidebarItem>Server-side vs Client-side pagination</SidebarItem>
-            <SidebarItem>Mastering TypeScript utility types</SidebarItem>
-            <SidebarItem>GraphQL vs REST in Next.js</SidebarItem>
-            <SidebarItem>React performance profiling</SidebarItem>
-            <SidebarItem>Building a design system</SidebarItem>
-            <SidebarItem>Testing React components</SidebarItem>
-            <SidebarItem>State machines in React</SidebarItem>
-          </SidebarList>
-        </div>
+        {children}
       </div>
     </aside>
   );
 }
 
-function SidebarHeader({ children }: { children: React.ReactNode }) {
+export function SidebarSeparator() {
+  return <div className="w-8 h-px bg-white/10 my-6" />;
+}
+
+export function SidebarTrigger({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-center size-12 rounded-2xl cursor-pointer',
+        'bg-white/10 hover:bg-white/15 transition-all duration-150 ease-in-out'
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SidebarMenu({ children }: { children: React.ReactNode }) {
+  return <div className={cn('group sidebar-menu')}>{children}</div>;
+}
+
+export function SidebarMenuContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { dock } = useSidebar();
+
+  return (
+    <div
+      className={cn(
+        'absolute top-0 left-(--sidebar-first-width) h-full -z-10',
+        'bg-background/60 backdrop-blur-lg transition-all duration-150 ease-in-out',
+        'flex flex-col border-r border-transparent',
+        'w-(--sidebar-second-width)',
+        'sidebar-menu-content',
+        'before:w-px before:h-full before:bg-border before:absolute before:top-0 before:left-0',
+        dock && [
+          'border-border invisible opacity-0 -translate-x-10',
+          'group-hover/sidebar:visible group-hover/sidebar:opacity-100 group-hover/sidebar:-translate-x-0',
+        ]
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SidebarHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="flex items-center justify-between mb-6 p-4 pb-0">
       {children}
@@ -118,16 +92,15 @@ function SidebarHeader({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SidebarTitle({ children }: { children: React.ReactNode }) {
+export function SidebarTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="font-semibold text-lg">{children}</h2>;
 }
 
-function SidebarSubtitle({ children }: { children: React.ReactNode }) {
+export function SidebarSubtitle({ children }: { children: React.ReactNode }) {
   return (
     <h3
       className={cn(
-        'font-semibold mb-2 -mx-4 px-4 text-sm bg-background text-muted-foreground',
-        'sticky top-0 z-10'
+        'font-semibold mb-2 -mx-4 px-4 text-sm text-muted-foreground'
       )}
     >
       {children}
@@ -135,23 +108,23 @@ function SidebarSubtitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SidebarList({ children }: { children: React.ReactNode }) {
-  return (
-    <ul className="flex flex-col -mx-2 gap-0.5 mb-6 relative">{children}</ul>
-  );
+export function SidebarList({ children }: { children: React.ReactNode }) {
+  return <ul className="flex flex-col gap-0.5 mb-6 relative">{children}</ul>;
 }
 
-function SidebarItem({
+export function SidebarItem({
   children,
+  href,
   active,
 }: {
   children: React.ReactNode;
+  href: string;
   active?: boolean;
 }) {
   return (
     <li>
       <Link
-        href="/"
+        href={href}
         className={cn(
           'inline-block w-full text-left rounded-lg p-2 relative',
           'border border-transparent',

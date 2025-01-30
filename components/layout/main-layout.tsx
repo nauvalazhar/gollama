@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar } from '@/components/layout/sidebar';
+import { MainSidebar } from '@/components/layout/main-sidebar';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -12,31 +12,26 @@ export function MainLayout({
   children: React.ReactNode;
   sidebarFromCookie?: boolean;
 }) {
-  const [isSecondaryCollapsed, setIsSecondaryCollapsed] = useState(
-    sidebarFromCookie || false
-  );
+  const [isDocked, setIsDocked] = useState(sidebarFromCookie || false);
 
   useHotkeys('ctrl+b', () => {
-    setIsSecondaryCollapsed(!isSecondaryCollapsed);
+    setIsDocked(!isDocked);
   });
 
-  const handleCollapse = () => {
-    const isCollapsed = !isSecondaryCollapsed;
-    setIsSecondaryCollapsed(isCollapsed);
-    document.cookie = `sidebarCollapsed=${isCollapsed};path=/;max-age=31536000`;
+  const handleDock = () => {
+    const _isDocked = !isDocked;
+    setIsDocked(_isDocked);
+    document.cookie = `sidebarDocked=${_isDocked};path=/;max-age=31536000`;
   };
 
   return (
     <div className="flex h-dvh w-dvw overflow-hidden">
-      <Sidebar
-        collapse={isSecondaryCollapsed}
-        handleCollapse={handleCollapse}
-      />
+      <MainSidebar dock={isDocked} handleDock={handleDock} />
       <main
         className={cn(
           'w-full h-full transition-all duration-150 ease-in-out relative',
           'shadow-2xl decoration-before bg-after after:bg-main',
-          isSecondaryCollapsed && '-ml-(--sidebar-second-width)'
+          isDocked ? 'ml-(--sidebar-first-width)' : 'ml-(--sidebar-width)'
         )}
       >
         {children}

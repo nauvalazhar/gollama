@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "tsx scripts/setup.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.1.5",
@@ -25,7 +26,9 @@
     "@tiptap/pm": "^2.11.3",
     "@tiptap/react": "^2.11.3",
     "@tiptap/starter-kit": "^2.11.3",
+    "@types/better-sqlite3": "^7.6.12",
     "ai": "^4.1.9",
+    "better-sqlite3": "^11.8.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
@@ -44,9 +47,11 @@
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",
     "remark-gfm": "^4.0.0",
+    "swr": "^2.3.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
-    "tiptap-markdown": "^0.8.10"
+    "tiptap-markdown": "^0.8.10",
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
