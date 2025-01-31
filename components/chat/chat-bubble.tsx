@@ -84,7 +84,9 @@ interface ChatBubbleDetailProps {
 
 export function ChatBubbleDetail({ children }: ChatBubbleDetailProps) {
   return (
-    <div className="flex flex-col gap-1 chat-bubble-detail">{children}</div>
+    <div className="flex flex-col gap-1 chat-bubble-detail overflow-hidden">
+      {children}
+    </div>
   );
 }
 

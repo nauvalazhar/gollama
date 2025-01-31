@@ -39,11 +39,6 @@ export function getChats() {
   }
 }
 
-type GroupedChatsResult = {
-  date: string;
-  chats: Chat[];
-}[];
-
 export function getChatsGroupedByDate() {
   try {
     const results = db
@@ -53,7 +48,7 @@ export function getChatsGroupedByDate() {
           id,
           title
         FROM Chat
-        ORDER BY createdAt DESC
+        ORDER BY COALESCE(updatedAt, createdAt) DESC
       `
       )
       .all();
@@ -82,6 +77,20 @@ export function getChat(id: string) {
       }`
     );
   }
+}
+
+export function updateChatDate(id: string) {
+  return db
+    .prepare('UPDATE Chat SET updatedAt = CURRENT_TIMESTAMP WHERE id = ?')
+    .run(id);
+}
+
+export function deleteChat(id: string) {
+  return db.prepare('DELETE FROM Chat WHERE id = ?').run(id);
+}
+
+export function deleteMessagesByChatId(chatId: string) {
+  return db.prepare('DELETE FROM Message WHERE chatId = ?').run(chatId);
 }
 
 export function insertMessage(message: Message) {

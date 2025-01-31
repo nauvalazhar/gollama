@@ -24,75 +24,138 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { memo, useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
+import { useRouter } from 'next/navigation';
+import { useSWRConfig } from 'swr';
+import { toast } from 'sonner';
 
 interface ChatHeaderProps {
   onModelChange?: (value: string) => void;
   onTitleChange?: (value: string) => void;
   title?: string;
+  id: string;
 }
 
-export function ChatHeader({
-  onModelChange,
-  onTitleChange,
-  title,
-}: ChatHeaderProps) {
+function Header({ onModelChange, onTitleChange, title, id }: ChatHeaderProps) {
+  const [beingDeleted, setBeingDeleted] = useState(false);
+  const router = useRouter();
+  const { mutate } = useSWRConfig();
+
+  const handleDelete = async () => {
+    const deletePromise = fetch(`/api/chat`, {
+      method: 'DELETE',
+      body: JSON.stringify({ id }),
+    });
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting chat...',
+      success: () => {
+        mutate('/api/chat/history');
+
+        return 'Chat deleted successfully';
+      },
+      error: 'Failed to delete chat',
+    });
+
+    setBeingDeleted(false);
+
+    router.push('/');
+  };
+
   return (
-    <header className="flex items-center py-2 px-6 border-b border-border">
-      <div className="w-4/12">
-        <ModelSelector onChange={(value) => onModelChange?.(value)} />
-      </div>
-      <div className="w-4/12 flex items-center">
-        {title && (
-          <EditableText
-            as="h1"
-            value={title}
-            onSubmit={(value) => onTitleChange?.(value)}
-            className="font-semibold text-center text-lg"
-          />
-        )}
-      </div>
-      <div className="w-4/12">
-        <div className="flex items-center gap-2 justify-end">
-          <TooltipProvider>
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Bookmark className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="text-xs">Bookmark chat</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreVertical className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Pencil className="mr-1 size-4" />
-                Move to folder
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Info className="mr-1 size-4" />
-                Archive chat
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Download className="mr-1 size-4" />
-                Export chat
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
-                <Trash className="mr-1 size-4" />
-                Delete chat
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <>
+      <AlertDialog open={beingDeleted} onOpenChange={setBeingDeleted}>
+        <AlertDialogContent>
+          <AlertDialogTitle>Delete Chat</AlertDialogTitle>
+          <AlertDialogDescription>
+            You are about to delete this chat. This action cannot be undone.
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => toast.info('Canceled')}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDelete}>
+              Delete Chat
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <header className="flex items-center py-2 px-6 border-b border-border">
+        <div className="w-4/12">
+          <ModelSelector onChange={(value) => onModelChange?.(value)} />
         </div>
-      </div>
-    </header>
+        <div className="w-4/12 flex items-center">
+          {title && (
+            <EditableText
+              as="h1"
+              value={title}
+              onSubmit={(value) => onTitleChange?.(value)}
+              className="font-semibold text-center text-lg"
+            />
+          )}
+        </div>
+        <div className="w-4/12">
+          <div className="flex items-center gap-2 justify-end">
+            <TooltipProvider>
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Bookmark className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">Bookmark chat</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Pencil className="mr-1 size-4" />
+                  Move to folder
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Info className="mr-1 size-4" />
+                  Archive chat
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Download className="mr-1 size-4" />
+                  Export chat
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={() => setBeingDeleted(true)}
+                >
+                  <Trash className="mr-1 size-4" />
+                  Delete chat
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </header>
+    </>
   );
 }
+
+export const ChatHeader = memo(Header, (prevProps, nextProps) => {
+  if (prevProps.title !== nextProps.title) return false;
+
+  return true;
+});

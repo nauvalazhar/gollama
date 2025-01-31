@@ -1,10 +1,13 @@
 import { Message, streamText } from 'ai';
 import { ollama } from 'ollama-ai-provider';
 import {
+  deleteChat,
+  deleteMessagesByChatId,
   getChat,
   insertChat,
   insertMessage,
   insertMessages,
+  updateChatDate,
 } from '@/database/queries';
 import { getLastUserMessage } from '@/lib/utils';
 import { systemPrompt } from '@/lib/prompt/system';
@@ -40,6 +43,8 @@ export async function POST(req: Request) {
       title,
       visibility: 'public',
     });
+  } else {
+    updateChatDate(id);
   }
 
   insertMessage({
@@ -66,4 +71,13 @@ export async function POST(req: Request) {
   });
 
   return result.toDataStreamResponse();
+}
+
+export async function DELETE(req: Request) {
+  const { id }: { id: string } = await req.json();
+
+  deleteChat(id);
+  deleteMessagesByChatId(id);
+
+  return new Response('Chat deleted', { status: 200 });
 }

@@ -69,12 +69,14 @@
     --sidebar-width: calc(var(--sidebar-first-width) + var(--sidebar-second-width));
     --chat-bubble: 0 0% 100% / 0.03;
     --command: 218 15% 14%;
+    --dialog: 218 15% 14%;
   }
 }
 
 @theme {
   --color-chat-bubble: hsl(var(--chat-bubble));
   --color-command: hsl(var(--command));
+  --color-dialog: hsl(var(--dialog));
 }
 
 @utility bg-main {

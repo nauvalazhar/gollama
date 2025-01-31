@@ -3,9 +3,9 @@
 import { Editor } from '@/components/editor/editor';
 import { cn } from '@/lib/utils';
 import { ChatRequestOptions } from 'ai';
-import { FormEvent, useState, useRef } from 'react';
+import { FormEvent, useState, useRef, memo } from 'react';
 
-export function ChatForm({
+function Form({
   handleSubmit,
   input,
   setInput,
@@ -62,3 +62,9 @@ export function ChatForm({
     </>
   );
 }
+
+export const ChatForm = memo(Form, (prevProps, nextProps) => {
+  if (prevProps.input !== nextProps.input) return false;
+
+  return true;
+});
