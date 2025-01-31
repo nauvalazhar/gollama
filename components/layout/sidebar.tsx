@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext } from 'react';
+import { createContext, memo, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -109,10 +109,12 @@ export function SidebarSubtitle({ children }: { children: React.ReactNode }) {
 }
 
 export function SidebarList({ children }: { children: React.ReactNode }) {
-  return <ul className="flex flex-col gap-0.5 mb-6 relative">{children}</ul>;
+  return (
+    <ul className="flex flex-col gap-0.5 mb-6 -mx-2 relative">{children}</ul>
+  );
 }
 
-export function SidebarItem({
+function PureSidebarItem({
   children,
   href,
   active,
@@ -140,3 +142,7 @@ export function SidebarItem({
     </li>
   );
 }
+
+export const SidebarItem = memo(PureSidebarItem, (prev, next) => {
+  return prev.href === next.href && prev.active === next.active;
+});

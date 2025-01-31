@@ -1,5 +1,5 @@
 import { db } from './database';
-import { Chat, Message } from './types';
+import { Chat, ChatHistoryGroup, Message } from './types';
 
 export function insert<T extends Record<string, unknown>>(
   table: string,
@@ -28,32 +28,62 @@ export function insertChat(chat: Chat) {
 
 export function getChats() {
   try {
-    return db.prepare('SELECT * FROM Chat').all();
-  } catch (error) {
-    console.error('Failed to get chats:', error);
-    throw new Error(
-      `Failed to get chats: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
-}
-
-export function getChatsGroupedByDate() {
-  try {
     const results = db
       .prepare(
         `
-        SELECT 
-          id,
-          title
-        FROM Chat
-        ORDER BY COALESCE(updatedAt, createdAt) DESC
-      `
-      )
-      .all();
+          WITH ChatGroups AS (
+            SELECT 
+              *,
+              CASE 
+                WHEN date(updatedAt, 'localtime') = date('now', 'localtime') THEN 'Today'
+                WHEN date(updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 'Yesterday'
+                WHEN date(updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
+                  AND date('now', '-2 day', 'localtime') THEN '7 Days'
+                ELSE 'Older'
+              END AS time_group,
+              CASE 
+                WHEN date(updatedAt, 'localtime') = date('now', 'localtime') THEN 1
+                WHEN date(updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 2
+                WHEN date(updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
+                  AND date('now', '-2 day', 'localtime') THEN 3
+                ELSE 4
+              END AS sort_order
+            FROM Chat
+          )
 
-    return results;
+          SELECT 
+            time_group AS date,
+            (
+              SELECT json_group_array(
+                json_object(
+                  'id', id,
+                  'title', title,
+                  'visibility', visibility,
+                  'createdAt', datetime(createdAt, 'localtime'),
+                  'updatedAt', datetime(updatedAt, 'localtime')
+                )
+              )
+              FROM (
+                SELECT *
+                FROM ChatGroups c2
+                WHERE c2.time_group = c1.time_group
+                ORDER BY c2.updatedAt DESC
+              )
+            ) AS chats
+          FROM ChatGroups c1
+          GROUP BY time_group, sort_order
+          ORDER BY sort_order;
+        `
+      )
+      .all() as {
+      date: string;
+      chats: string;
+    }[];
+
+    return results.map((result) => ({
+      date: result.date,
+      chats: JSON.parse(result.chats),
+    })) as ChatHistoryGroup[];
   } catch (error) {
     console.error('Failed to get grouped chats:', error);
     throw new Error(

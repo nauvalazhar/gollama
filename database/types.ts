@@ -24,3 +24,8 @@ export type Folder = {
   createdAt?: number;
   updatedAt?: number;
 };
+
+export type ChatHistoryGroup = {
+  date: string;
+  chats: Chat[];
+};

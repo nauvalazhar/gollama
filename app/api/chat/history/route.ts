@@ -1,10 +1,10 @@
-import { getChatsGroupedByDate } from '@/database/queries';
+import { getChats } from '@/database/queries';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const chats = getChatsGroupedByDate();
+  const chats = getChats();
 
-  if (!chats) {
+  if (chats.length === 0) {
     return NextResponse.json({ error: 'No chats found' }, { status: 404 });
   }
 

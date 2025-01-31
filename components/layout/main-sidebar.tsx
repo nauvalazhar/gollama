@@ -11,6 +11,7 @@ import {
   SidebarList,
   SidebarItem,
   SidebarSeparator,
+  SidebarSubtitle,
 } from '@/components/layout/sidebar';
 import {
   MessagesSquare,
@@ -24,8 +25,8 @@ import { Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SearchButton } from '@/components/command/search-button';
 import useSWR from 'swr';
-import { Suspense } from 'react';
-import { Chat } from '@/database/types';
+import { Fragment, Suspense } from 'react';
+import { Chat, ChatHistoryGroup } from '@/database/types';
 import { useParams } from 'next/navigation';
 
 export function MainSidebar({
@@ -95,22 +96,29 @@ export function MainSidebar({
 }
 
 function ChatHistory() {
-  const { data } = useSWR('/api/chat/history', fetcher);
+  const { data } = useSWR<ChatHistoryGroup[]>('/api/chat/history', fetcher);
   const params = useParams();
 
   if (!data) return null;
 
   return (
-    <SidebarList>
-      {data.map((chat: Chat) => (
-        <SidebarItem
-          key={chat.id}
-          href={`/chat/${chat.id}`}
-          active={params.id === chat.id}
-        >
-          {chat.title}
-        </SidebarItem>
+    <>
+      {data.map((group) => (
+        <Fragment key={group.date}>
+          <SidebarSubtitle>{group.date}</SidebarSubtitle>
+          <SidebarList key={group.date}>
+            {group.chats.map((chat) => (
+              <SidebarItem
+                key={chat.id}
+                href={`/chat/${chat.id}`}
+                active={params.id === chat.id}
+              >
+                {chat.title}
+              </SidebarItem>
+            ))}
+          </SidebarList>
+        </Fragment>
       ))}
-    </SidebarList>
+    </>
   );
 }
