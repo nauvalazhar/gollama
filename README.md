@@ -8,10 +8,10 @@ yppd (yg penting2 dlu):
 - database (sqlite)
 - tools (search web)
 - attachment (doc extraction)
-- tools (quote, good/bad vote, regenerate, copy, resize)
+- tools (quote, regenerate, copy, resize)
 
 performance issue:
-- slow after the first chat (use more lightweight llm for development purposes)
+- slow after the first chat (use more lightweight llm for development purposes) (update: it was the markdown component)
 
 nice to have (g penting tp kepikiran):
 - reddit-like arrow navigation (next/prev message)
