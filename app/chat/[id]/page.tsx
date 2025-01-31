@@ -3,6 +3,14 @@ import { getChat, getMessagesByChatId } from '@/database/queries';
 import { convertMessagesToUi } from '@/lib/utils';
 import { notFound } from 'next/navigation';
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const chat = await getChat(params.id);
+
+  return {
+    title: chat?.title || 'Chat',
+  };
+}
+
 export default async function ChatPage({
   params,
 }: {
