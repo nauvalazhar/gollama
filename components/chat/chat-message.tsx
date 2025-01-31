@@ -1,13 +1,10 @@
-import { Bot, Copy, Maximize2, Pencil, Quote, RefreshCw } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import {
   ChatBubble,
   ChatBubbleAvatar,
   ChatBubbleContent,
   ChatBubbleDetail,
-  ChatBubbleDivider,
   ChatBubbleName,
-  ChatBubbleTool,
-  ChatBubbleTools,
 } from './chat-bubble';
 import { Message as MessageAi } from 'ai';
 import { memo } from 'react';

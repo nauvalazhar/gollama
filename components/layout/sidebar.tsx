@@ -114,7 +114,7 @@ export function SidebarList({ children }: { children: React.ReactNode }) {
   );
 }
 
-function PureSidebarItem({
+function PureSidebarLink({
   children,
   href,
   active,
@@ -143,6 +143,30 @@ function PureSidebarItem({
   );
 }
 
-export const SidebarItem = memo(PureSidebarItem, (prev, next) => {
+export const SidebarLink = memo(PureSidebarLink, (prev, next) => {
   return prev.href === next.href && prev.active === next.active;
 });
+
+export function SidebarGroup({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={cn('flex flex-col', 'bg-white/5 rounded-xl mb-6')}>
+      {children}
+    </div>
+  );
+}
+
+export function SidebarItem({ children }: { children: React.ReactNode }) {
+  return (
+    <button
+      className={cn(
+        'flex items-center gap-4 w-full cursor-pointer',
+        'px-4 py-2 text-white/80',
+        'hover:bg-white/5 hover:text-white',
+        'border-b last:border-b-0',
+        'first:rounded-t-xl last:rounded-b-xl'
+      )}
+    >
+      {children}
+    </button>
+  );
+}

@@ -4,6 +4,7 @@ import {
   Bookmark,
   Download,
   Info,
+  MessageSquarePlus,
   MoreVertical,
   Pencil,
   Trash,
@@ -37,6 +38,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 interface ChatHeaderProps {
   onModelChange?: (value: string) => void;
@@ -100,7 +102,12 @@ function Header({ onModelChange, title, id }: ChatHeaderProps) {
 
       <header className="flex items-center py-2 px-6 border-b border-border">
         <div className="w-4/12">
-          <ModelSelector onChange={(value) => onModelChange?.(value)} />
+          <Button variant="outline" asChild>
+            <Link href="/">
+              <MessageSquarePlus className="size-4" />
+              <span className="ml-2">New Chat</span>
+            </Link>
+          </Button>
         </div>
         <div className="w-4/12 flex items-center">
           {title && (

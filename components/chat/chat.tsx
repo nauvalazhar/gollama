@@ -9,6 +9,7 @@ import { generateUUID } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { ChatMessages } from '@/components/chat/chat-messages';
+import { Info } from 'lucide-react';
 
 export function Chat({
   id,
@@ -55,6 +56,12 @@ export function Chat({
       <div ref={chatContainerRef} className="overflow-y-auto h-full py-6">
         <div className="flex flex-col gap-10 max-w-3xl mx-auto">
           <ChatMessages messages={messages} isLoading={isLoading} />
+          {messages.length > 0 && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mx-auto">
+              <Info size={16} />
+              AI can make mistakes. Always verify information.
+            </p>
+          )}
           <div ref={endRef} />
         </div>
       </div>

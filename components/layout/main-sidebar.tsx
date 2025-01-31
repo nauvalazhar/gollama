@@ -9,11 +9,18 @@ import {
   SidebarHeader,
   SidebarTitle,
   SidebarList,
-  SidebarItem,
+  SidebarLink,
   SidebarSeparator,
   SidebarSubtitle,
+  SidebarGroup,
+  SidebarItem,
 } from '@/components/layout/sidebar';
 import {
+  Archive,
+  Bookmark,
+  Folder,
+  FolderArchive,
+  FolderHeart,
   MessagesSquare,
   PanelRightClose,
   PanelRightOpen,
@@ -28,6 +35,7 @@ import useSWR from 'swr';
 import { Fragment, Suspense } from 'react';
 import { Chat, ChatHistoryGroup } from '@/database/types';
 import { useParams } from 'next/navigation';
+import { Tabs, TabsTrigger, TabsList, TabsContent } from '@/components/ui/tabs';
 
 export function MainSidebar({
   dock,
@@ -60,19 +68,27 @@ export function MainSidebar({
                 <SidebarTitle>Chat History</SidebarTitle>
                 <SearchButton />
               </SidebarHeader>
-              <div className="px-4">
-                <Button className="w-full py-5" asChild>
-                  <Link href="/">
-                    <PlusIcon className="size-4" />
-                    New chat
-                  </Link>
-                </Button>
-              </div>
-              <div className="overflow-y-auto px-4 h-full mt-6">
-                <Suspense fallback={<div>Loading...</div>}>
-                  <ChatHistory />
-                </Suspense>
-              </div>
+
+              <Tabs
+                defaultValue="chat"
+                className="h-full overflow-hidden flex flex-col"
+              >
+                <div className="px-4">
+                  <TabsList className="w-full grid grid-cols-2">
+                    <TabsTrigger value="chat">Chat</TabsTrigger>
+                    <TabsTrigger value="folder">Folder</TabsTrigger>
+                  </TabsList>
+                </div>
+
+                <TabsContent value="chat" className="overflow-y-auto mt-6 px-4">
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <ChatHistory />
+                  </Suspense>
+                </TabsContent>
+                <TabsContent value="folder" className="px-4 mt-6">
+                  <ChatFolder />
+                </TabsContent>
+              </Tabs>
             </SidebarMenuContent>
           </SidebarMenu>
         </div>
@@ -108,17 +124,55 @@ function ChatHistory() {
           <SidebarSubtitle>{group.date}</SidebarSubtitle>
           <SidebarList key={group.date}>
             {group.chats.map((chat) => (
-              <SidebarItem
+              <SidebarLink
                 key={chat.id}
                 href={`/chat/${chat.id}`}
                 active={params.id === chat.id}
               >
                 {chat.title}
-              </SidebarItem>
+              </SidebarLink>
             ))}
           </SidebarList>
         </Fragment>
       ))}
     </>
+  );
+}
+
+function ChatFolder() {
+  return (
+    <div>
+      <SidebarSubtitle>Special Folder</SidebarSubtitle>
+      <SidebarGroup>
+        <SidebarItem>
+          <Bookmark className="size-4" />
+          Bookmarks
+        </SidebarItem>
+        <SidebarItem>
+          <Archive className="size-4" />
+          Archived
+        </SidebarItem>
+      </SidebarGroup>
+
+      <SidebarSubtitle>Your Folder</SidebarSubtitle>
+      <SidebarGroup>
+        <SidebarItem>
+          <Folder className="size-4" />
+          All Chats
+        </SidebarItem>
+        <SidebarItem>
+          <Folder className="size-4" />
+          Folder 1
+        </SidebarItem>
+        <SidebarItem>
+          <Folder className="size-4" />
+          Folder 2
+        </SidebarItem>
+        <SidebarItem>
+          <Folder className="size-4" />
+          Folder 3
+        </SidebarItem>
+      </SidebarGroup>
+    </div>
   );
 }

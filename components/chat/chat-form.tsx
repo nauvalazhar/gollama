@@ -50,7 +50,7 @@ function Form({
       <div
         className={cn('absolute left-0 bottom-4 w-full', 'flex justify-center')}
       >
-        <form ref={formRef} onSubmit={handleSubmitForm} className="w-4xl">
+        <form ref={formRef} onSubmit={handleSubmitForm} className="w-3xl">
           <Editor
             onChange={handleChange}
             onHeightChange={handleHeightChange}

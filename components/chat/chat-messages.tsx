@@ -37,12 +37,6 @@ function Messages({
             </ChatBubbleDetail>
           </ChatBubble>
         )}
-      {messages.length > 0 && (
-        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mx-auto pb-8">
-          <Info size={16} />
-          AI can make mistakes. Always verify information.
-        </p>
-      )}
     </>
   );
 }
