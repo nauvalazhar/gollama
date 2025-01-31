@@ -41,6 +41,7 @@ export function EditableText({
       if (elementRef.current) {
         elementRef.current.textContent = initialValue;
         elementRef.current.blur();
+        window.getSelection()?.removeAllRanges();
       }
     }
   };
@@ -55,7 +56,7 @@ export function EditableText({
         className={cn(
           'inline-block w-full px-4 rounded-md focus:outline-none ring-2 ring-transparent focus:ring-primary',
           'whitespace-nowrap hover:ring-white/10 transition-all',
-          'cursor-pointer focus:cursor-text',
+          'cursor-pointer focus:cursor-text min-w-34',
           className
         )}
         suppressContentEditableWarning
@@ -82,7 +83,7 @@ function HelpText({
   return (
     <p
       className={cn(
-        'text-xs text-muted-foreground absolute -bottom-6 right-0',
+        'text-xs text-muted-foreground absolute -bottom-6 left-0',
         'opacity-0 transition-all select-none pointer-events-none',
         className
       )}

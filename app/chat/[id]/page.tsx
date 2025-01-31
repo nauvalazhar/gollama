@@ -7,7 +7,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   const chat = await getChat(params.id);
 
   return {
-    title: chat?.title || 'Chat',
+    title: chat?.title || 'Untitled Chat',
   };
 }
 

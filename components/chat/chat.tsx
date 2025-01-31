@@ -49,7 +49,6 @@ export function Chat({
       <ChatHeader
         title={title}
         onModelChange={(value) => console.log('Model changed:', value)}
-        onTitleChange={(value) => console.log(value)}
         id={id}
       />
 

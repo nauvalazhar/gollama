@@ -40,12 +40,11 @@ import { toast } from 'sonner';
 
 interface ChatHeaderProps {
   onModelChange?: (value: string) => void;
-  onTitleChange?: (value: string) => void;
   title?: string;
   id: string;
 }
 
-function Header({ onModelChange, onTitleChange, title, id }: ChatHeaderProps) {
+function Header({ onModelChange, title, id }: ChatHeaderProps) {
   const [beingDeleted, setBeingDeleted] = useState(false);
   const router = useRouter();
   const { mutate } = useSWRConfig();
@@ -69,6 +68,15 @@ function Header({ onModelChange, onTitleChange, title, id }: ChatHeaderProps) {
     setBeingDeleted(false);
 
     router.push('/');
+  };
+
+  const handleTitleChange = async (value: string) => {
+    await fetch('/api/chat/rename', {
+      method: 'PATCH',
+      body: JSON.stringify({ id, title: value }),
+    });
+
+    mutate('/api/chat/history');
   };
 
   return (
@@ -99,7 +107,7 @@ function Header({ onModelChange, onTitleChange, title, id }: ChatHeaderProps) {
             <EditableText
               as="h1"
               value={title}
-              onSubmit={(value) => onTitleChange?.(value)}
+              onSubmit={handleTitleChange}
               className="font-semibold text-center text-lg"
             />
           )}

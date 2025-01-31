@@ -85,6 +85,10 @@ export function updateChatDate(id: string) {
     .run(id);
 }
 
+export function updateChatTitle(id: string, title: string) {
+  return db.prepare('UPDATE Chat SET title = ? WHERE id = ?').run(title, id);
+}
+
 export function deleteChat(id: string) {
   return db.prepare('DELETE FROM Chat WHERE id = ?').run(id);
 }

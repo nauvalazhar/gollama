@@ -5,13 +5,17 @@ preview
 ![localhost_3000_ (1)](https://github.com/user-attachments/assets/7737dfe5-cf1b-4572-91e5-993f2492bfaf)
 
 yppd (yg penting2 dlu):
-- database (sqlite)
-- tools (search web)
-- attachment (doc extraction)
-- tools (quote, regenerate, copy, resize)
 
-performance issue:
-- slow after the first chat (use more lightweight llm for development purposes) (update: it was the markdown component)
+- [x] database (sqlite)
+- [ ] tools (search web)
+- [ ] attachment (doc extraction)
+- [ ] tools (quote, regenerate, copy, resize)
+- [ ] options (delete, rename, folder)
+
+known issue:
+
+- slow generation when using syntax highlighting
 
 nice to have (g penting tp kepikiran):
+
 - reddit-like arrow navigation (next/prev message)
