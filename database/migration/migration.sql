@@ -26,18 +26,25 @@ CREATE TABLE Message (
 
 CREATE TABLE Folder (
     id TEXT PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     visibility TEXT NOT NULL DEFAULT 'public',
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- first or insert folder
+-- bookmark and archived
+
+INSERT INTO Folder (id, name, visibility) 
+VALUES 
+('bookmark', 'Bookmark', 'public'),
+('archived', 'Archived', 'public')
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE ChatFolder (
-    id TEXT PRIMARY KEY NOT NULL,
     chatId TEXT NOT NULL,
     folderId TEXT NOT NULL,
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (chatId) REFERENCES Chat(id) ON DELETE CASCADE,
     FOREIGN KEY (folderId) REFERENCES Folder(id) ON DELETE CASCADE
 );
+

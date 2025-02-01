@@ -1,13 +1,7 @@
 'use client';
 
-import {
-  useEditor,
-  EditorContent,
-  BubbleMenu,
-  FloatingMenu,
-} from '@tiptap/react';
+import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import CodeBlock from '@tiptap/extension-code-block';
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
 import { cn } from '@/lib/utils';
@@ -45,6 +39,7 @@ interface EditorProps {
   onChange?: (markdown: string) => void;
   onEnter?: (event: KeyboardEvent, clear: () => void) => void;
   onHeightChange?: (height: number) => void;
+  onCreated?: () => void;
 }
 
 export function Editor({
@@ -53,6 +48,7 @@ export function Editor({
   onChange,
   onEnter,
   onHeightChange,
+  onCreated,
 }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
@@ -84,6 +80,10 @@ export function Editor({
     },
     onCreate: () => {
       onHeightChange?.(editorRef.current?.clientHeight ?? 0);
+      // delay to allow the editor to be created
+      setTimeout(() => {
+        onCreated?.();
+      }, 100);
     },
     editorProps: {
       handleDOMEvents: {

@@ -32,7 +32,7 @@ function Messages({
             <ChatBubbleDetail>
               <ChatBubbleName>Assistant</ChatBubbleName>
               <ChatBubbleContent>
-                <Loader className="animate-spin size-4" />
+                <span className="animate-pulse italic">Thinking...</span>
               </ChatBubbleContent>
             </ChatBubbleDetail>
           </ChatBubble>

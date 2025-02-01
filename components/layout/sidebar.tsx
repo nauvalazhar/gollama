@@ -144,7 +144,11 @@ function PureSidebarLink({
 }
 
 export const SidebarLink = memo(PureSidebarLink, (prev, next) => {
-  return prev.href === next.href && prev.active === next.active;
+  if (prev.href !== next.href) return false;
+  if (prev.active !== next.active) return false;
+  if (prev.children !== next.children) return false;
+
+  return true;
 });
 
 export function SidebarGroup({ children }: { children: React.ReactNode }) {

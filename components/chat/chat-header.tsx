@@ -90,9 +90,7 @@ function Header({ onModelChange, title, id }: ChatHeaderProps) {
             You are about to delete this chat. This action cannot be undone.
           </AlertDialogDescription>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => toast.info('Canceled')}>
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={handleDelete}>
               Delete Chat
             </AlertDialogAction>

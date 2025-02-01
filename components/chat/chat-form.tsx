@@ -3,13 +3,15 @@
 import { Editor } from '@/components/editor/editor';
 import { cn } from '@/lib/utils';
 import { ChatRequestOptions } from 'ai';
-import { FormEvent, useState, useRef, memo } from 'react';
+import { FormEvent, useRef, memo } from 'react';
 
 function Form({
   handleSubmit,
   input,
   setInput,
-}: React.HTMLAttributes<HTMLFormElement> & {
+  onHeightChange,
+  onEditorCreated,
+}: {
   handleSubmit: (
     event?: {
       preventDefault?: () => void;
@@ -18,13 +20,10 @@ function Form({
   ) => void;
   input: string;
   setInput: (input: string) => void;
+  onHeightChange: (height: number) => void;
+  onEditorCreated: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
-  const [editorHeight, setEditorHeight] = useState(0);
-
-  const handleHeightChange = (height: number) => {
-    setEditorHeight(height);
-  };
 
   const handleChange = (markdown: string) => {
     setInput(markdown);
@@ -34,32 +33,33 @@ function Form({
     e.preventDefault();
     if (!input.trim()) return;
 
-    handleSubmit(undefined);
-    setInput('');
+    setTimeout(() => {
+      handleSubmit(undefined);
+      setInput('');
+    }, 100);
   };
 
   const handleEnter = (e: KeyboardEvent, clear: () => void) => {
     const form = formRef.current;
+
     form?.requestSubmit();
     clear();
   };
 
   return (
-    <>
-      <div style={{ height: editorHeight + 20 }} className="flex-shrink-0" />
-      <div
-        className={cn('absolute left-0 bottom-4 w-full', 'flex justify-center')}
-      >
-        <form ref={formRef} onSubmit={handleSubmitForm} className="w-3xl">
-          <Editor
-            onChange={handleChange}
-            onHeightChange={handleHeightChange}
-            onEnter={handleEnter}
-            placeholder="Ask AI anything..."
-          />
-        </form>
-      </div>
-    </>
+    <div
+      className={cn('absolute left-0 bottom-4 w-full', 'flex justify-center')}
+    >
+      <form ref={formRef} onSubmit={handleSubmitForm} className="w-3xl">
+        <Editor
+          onCreated={onEditorCreated}
+          onChange={handleChange}
+          onHeightChange={onHeightChange}
+          onEnter={handleEnter}
+          placeholder="Ask AI anything..."
+        />
+      </form>
+    </div>
   );
 }
 
