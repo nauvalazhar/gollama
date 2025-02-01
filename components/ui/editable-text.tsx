@@ -3,66 +3,75 @@
 import { useState, useRef, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Kbd } from '@/components/ui/kbd';
+import { Slot } from '@radix-ui/react-slot';
 
 interface EditableTextProps {
-  value: string;
+  staticElement: (value: string) => React.ReactNode;
+  defaultValue: string;
   onSubmit: (value: string) => void;
   className?: string;
-  as?: React.ElementType;
+  classNameInput?: string;
 }
 
 export function EditableText({
-  value: initialValue,
+  staticElement,
+  defaultValue,
   onSubmit,
   className,
-  as: Tag = 'span',
+  classNameInput,
 }: EditableTextProps) {
-  const [value, setValue] = useState(initialValue);
-  const elementRef = useRef<HTMLElement>(null);
+  const [value, setValue] = useState(defaultValue);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
+    setValue(defaultValue);
+  }, [defaultValue]);
 
-  const handleBlur = () => {
-    const newValue = elementRef.current?.textContent || '';
-    if (newValue !== initialValue) {
-      setValue(newValue);
-      onSubmit(newValue);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      elementRef.current?.blur();
+      if (value.trim().length === 0) {
+        return;
+      } else if (value === defaultValue) {
+        setIsEditing(false);
+        return;
+      }
+
+      setIsEditing(false);
+      onSubmit(value);
     } else if (e.key === 'Escape') {
       e.preventDefault();
-      if (elementRef.current) {
-        elementRef.current.textContent = initialValue;
-        elementRef.current.blur();
-        window.getSelection()?.removeAllRanges();
-      }
+      setValue(defaultValue);
+      setIsEditing(false);
     }
   };
 
   return (
-    <div className="relative mx-auto group">
-      <Tag
-        ref={elementRef}
-        contentEditable
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          'inline-block w-full px-4 rounded-md focus:outline-none ring-2 ring-transparent focus:ring-primary',
-          'whitespace-nowrap hover:ring-white/10 transition-all',
-          'cursor-pointer focus:cursor-text min-w-34',
-          className
-        )}
-        suppressContentEditableWarning
-      >
-        {value}
-      </Tag>
+    <div className={cn('relative group', className)}>
+      {isEditing ? (
+        <input
+          autoFocus
+          contentEditable
+          className={cn(
+            'px-4 rounded-md focus:outline-none ring-2 ring-transparent focus:ring-primary',
+            'hover:ring-white/10 transition-all',
+            'min-w-48',
+            classNameInput
+          )}
+          style={{ width: `${value.length + 2}ch` }}
+          suppressContentEditableWarning
+          value={value}
+          onBlur={() => setIsEditing(false)}
+          onKeyDown={handleKeyDown}
+          onChange={handleChange}
+        />
+      ) : (
+        <Slot onClick={() => setIsEditing(true)}>{staticElement(value)}</Slot>
+      )}
       <HelpText className="translate-y-2 group-focus-within:opacity-100 group-focus-within:translate-y-0">
         Press <Kbd>Enter</Kbd> to submit
       </HelpText>
@@ -81,14 +90,16 @@ function HelpText({
   className?: string;
 }) {
   return (
-    <p
+    <div
       className={cn(
-        'text-xs text-muted-foreground absolute -bottom-6 left-0',
+        'bg-popover backdrop-blur-sm px-2 py-1 rounded-md',
+        'text-xs absolute z-10 -bottom-8 left-1/2 -translate-x-1/2',
         'opacity-0 transition-all select-none pointer-events-none',
+        'whitespace-nowrap',
         className
       )}
     >
       {children}
-    </p>
+    </div>
   );
 }

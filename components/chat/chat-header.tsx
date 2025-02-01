@@ -110,10 +110,11 @@ function Header({ onModelChange, title, id }: ChatHeaderProps) {
         <div className="w-4/12 flex items-center">
           {title && (
             <EditableText
-              as="h1"
-              value={title}
+              defaultValue={title}
               onSubmit={handleTitleChange}
-              className="font-semibold text-center text-lg"
+              className="text-lg font-semibold mx-auto"
+              classNameInput="text-center"
+              staticElement={(value) => <h1>{value}</h1>}
             />
           )}
         </div>
