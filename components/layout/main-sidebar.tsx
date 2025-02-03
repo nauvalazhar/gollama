@@ -4,6 +4,7 @@ import {
   Sidebar,
   SidebarProvider,
   SidebarMenu,
+  SidebarMenuList,
   SidebarTrigger,
   SidebarMenuContent,
   SidebarHeader,
@@ -43,8 +44,6 @@ import useSWR from 'swr';
 import { Fragment, Suspense, useEffect, useRef, useState } from 'react';
 import { Chat, ChatHistoryGroup, Folder as FolderDb } from '@/database/types';
 import { useParams } from 'next/navigation';
-import { Tabs, TabsTrigger, TabsList, TabsContent } from '@/components/ui/tabs';
-import { EditableText } from '@/components/ui/editable-text';
 import {
   DropdownMenu,
   DropdownMenuItem,
@@ -84,142 +83,109 @@ export function MainSidebar({
 }) {
   const { data } = useSWR<{ folders: FolderDb[] }>('/api/chat/folder', fetcher);
   const [folderId, setFolderId] = useState<string | undefined>();
-  const [tab, setTab] = useState<'chat' | 'folder'>('chat');
+  const [activeTab, setActiveTab] = useState<'chat' | 'folder'>('chat');
 
   const handleFolderChange = (value: string) => {
     setFolderId(value === 'all' ? undefined : value);
   };
 
   return (
-    <SidebarProvider value={{ dock }}>
-      <Sidebar>
-        <div
-          className={cn(
-            'flex items-center justify-center size-12 rounded-2xl',
-            'bg-primary'
-          )}
-        >
-          <Bot className="size-6" />
-        </div>
+    <Sidebar dock={dock} disableHover>
+      <div
+        className={cn(
+          'flex items-center justify-center size-12 rounded-2xl',
+          'bg-primary'
+        )}
+      >
+        <Bot className="size-6" />
+      </div>
 
-        <SidebarSeparator />
+      <SidebarSeparator />
 
-        <div className="flex flex-col gap-2">
-          <SidebarMenu>
-            <SidebarTrigger>
-              <MessagesSquare className="size-6" />
-            </SidebarTrigger>
-            <SidebarMenuContent>
-              <SidebarHeader>
-                <SidebarTitle>Chat History</SidebarTitle>
-                <SearchButton />
-              </SidebarHeader>
+      <SidebarMenuList>
+        <SidebarMenu active={activeTab === 'chat'}>
+          <SidebarTrigger onClick={() => setActiveTab('chat')}>
+            <MessagesSquare className="size-6" />
+          </SidebarTrigger>
+          <SidebarMenuContent>
+            <SidebarHeader>
+              <SidebarTitle>Chat History</SidebarTitle>
+              <SearchButton />
+            </SidebarHeader>
 
-              <div className="px-4 flex items-center gap-2">
-                <Select
-                  value={folderId}
-                  onValueChange={handleFolderChange}
-                  disabled={tab === 'folder'}
-                >
-                  <SelectTrigger>
-                    <div className="flex items-center gap-4">
-                      <Folder className="size-4 opacity-60" />
-                      <SelectValue placeholder="Select a folder" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Chat</SelectItem>
-                    {data?.folders.map((folder) => (
-                      <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {tab === 'chat' ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="flex-shrink-0"
-                          onClick={() => setTab('folder')}
-                        >
-                          <FolderTree className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">Folder</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="flex-shrink-0"
-                          onClick={() => setTab('chat')}
-                        >
-                          <MessagesSquare className="size-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">Chat</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
-              </div>
+            <div className="px-4 flex items-center gap-2">
+              <Select value={folderId} onValueChange={handleFolderChange}>
+                <SelectTrigger>
+                  <div className="flex items-center gap-4">
+                    <Folder className="size-4 opacity-60" />
+                    <SelectValue placeholder="Select a folder" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Chat</SelectItem>
+                  {data?.folders.map((folder) => (
+                    <SelectItem key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-              <Tabs
-                value={tab}
-                className="h-full overflow-hidden flex flex-col"
-              >
-                <TabsContent value="chat" className="overflow-y-auto mt-6 px-4">
-                  <Suspense fallback={<div>Loading...</div>}>
-                    <ChatHistory folderId={folderId} />
-                  </Suspense>
-                </TabsContent>
-                <TabsContent value="folder" className="px-4 mt-6">
-                  <ChatFolder />
-                </TabsContent>
-              </Tabs>
+            <div className="h-full overflow-y-auto flex flex-col px-4 py-4">
+              <Suspense fallback={<div>Loading...</div>}>
+                <ChatHistory folderId={folderId} />
+              </Suspense>
+            </div>
 
-              <div className="pt-4 px-4">
-                <SidebarGroup>
-                  <SidebarItem>
-                    <SidebarItemTrigger>
-                      <Bookmark className="size-4" />
-                      Bookmarks
-                    </SidebarItemTrigger>
-                  </SidebarItem>
-                  <SidebarItem>
-                    <SidebarItemTrigger>
-                      <Archive className="size-4" />
-                      Archived
-                    </SidebarItemTrigger>
-                  </SidebarItem>
-                </SidebarGroup>
-              </div>
-            </SidebarMenuContent>
-          </SidebarMenu>
-        </div>
+            <div className="pt-4 px-4">
+              <SidebarGroup>
+                <SidebarItem>
+                  <SidebarItemTrigger>
+                    <Bookmark className="size-4" />
+                    Bookmarks
+                  </SidebarItemTrigger>
+                </SidebarItem>
+                <SidebarItem>
+                  <SidebarItemTrigger>
+                    <Archive className="size-4" />
+                    Archived
+                  </SidebarItemTrigger>
+                </SidebarItem>
+              </SidebarGroup>
+            </div>
+          </SidebarMenuContent>
+        </SidebarMenu>
 
-        <Button
-          onClick={handleDock}
-          aria-label={dock ? 'Expand sidebar' : 'Collapse sidebar'}
-          variant="outline"
-          size="icon"
-          className="mt-auto"
-        >
-          {dock ? (
-            <PanelRightClose className="size-4" />
-          ) : (
-            <PanelRightOpen className="size-4" />
-          )}
-        </Button>
-      </Sidebar>
-    </SidebarProvider>
+        <SidebarMenu active={activeTab === 'folder'}>
+          <SidebarTrigger onClick={() => setActiveTab('folder')}>
+            <FolderTree className="size-6" />
+          </SidebarTrigger>
+          <SidebarMenuContent>
+            <SidebarHeader>
+              <SidebarTitle>Folder</SidebarTitle>
+            </SidebarHeader>
+            <div className="h-full flex flex-col px-4">
+              <ChatFolder />
+            </div>
+          </SidebarMenuContent>
+        </SidebarMenu>
+      </SidebarMenuList>
+
+      <Button
+        onClick={handleDock}
+        aria-label={dock ? 'Expand sidebar' : 'Collapse sidebar'}
+        variant="outline"
+        size="icon"
+        className="mt-auto"
+      >
+        {dock ? (
+          <PanelRightClose className="size-4" />
+        ) : (
+          <PanelRightOpen className="size-4" />
+        )}
+      </Button>
+    </Sidebar>
   );
 }
 

@@ -7,6 +7,7 @@ import { Slot } from '@radix-ui/react-slot';
 
 export const SidebarContext = createContext({
   dock: false,
+  disableHover: false,
 });
 
 export const useSidebar = () => useContext(SidebarContext);
@@ -16,24 +17,34 @@ export function SidebarProvider({
   value,
 }: {
   children: React.ReactNode;
-  value: { dock: boolean };
+  value: { dock: boolean; disableHover: boolean };
 }) {
   return (
     <SidebarContext.Provider value={value}>{children}</SidebarContext.Provider>
   );
 }
 
-export function Sidebar({ children }: { children: React.ReactNode }) {
+export function Sidebar({
+  children,
+  dock,
+  disableHover = false,
+}: {
+  children: React.ReactNode;
+  dock: boolean;
+  disableHover?: boolean;
+}) {
   return (
-    <aside className="flex fixed top-0 left-0 h-full z-10 group/sidebar">
-      <div
-        className={cn(
-          'w-(--sidebar-first-width) bg-background flex flex-col items-center py-4'
-        )}
-      >
-        {children}
-      </div>
-    </aside>
+    <SidebarProvider value={{ dock, disableHover }}>
+      <aside className="flex fixed top-0 left-0 h-full z-10 group/sidebar sidebar">
+        <div
+          className={cn(
+            'w-(--sidebar-first-width) bg-background flex flex-col items-center py-4'
+          )}
+        >
+          {children}
+        </div>
+      </aside>
+    </SidebarProvider>
   );
 }
 
@@ -41,12 +52,48 @@ export function SidebarSeparator() {
   return <div className="w-8 h-px bg-white/10 my-6" />;
 }
 
-export function SidebarTrigger({ children }: { children: React.ReactNode }) {
+export function SidebarTrigger({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  const { active } = useSidebarMenu();
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex items-center justify-center cursor-pointer relative',
+        'transition-all duration-150 ease-in-out size-full py-4',
+        'before:content-[""] before:absolute',
+        'before:size-12 before:rounded-2xl before:border before:border-transparent',
+        active
+          ? 'before:bg-white/10 before:border-border'
+          : 'opacity-60 group-hover/sidebar-menu:opacity-100'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function SidebarMenuList({ children }: { children: React.ReactNode }) {
+  const { disableHover } = useSidebar();
+
   return (
     <div
       className={cn(
-        'flex items-center justify-center size-12 rounded-2xl cursor-pointer',
-        'bg-white/10 hover:bg-white/15 transition-all duration-150 ease-in-out'
+        'sidebar-menu-list',
+        'w-full -my-2',
+
+        !disableHover && [
+          'hover:[&_.sidebar-menu-content]:opacity-0',
+          'hover:[&_.sidebar-menu-content]:-translate-x-10',
+          'hover:[&_.sidebar-menu:hover_.sidebar-menu-content]:opacity-100',
+          'hover:[&_.sidebar-menu:hover_.sidebar-menu-content]:-translate-x-0',
+        ]
       )}
     >
       {children}
@@ -54,8 +101,32 @@ export function SidebarTrigger({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SidebarMenu({ children }: { children: React.ReactNode }) {
-  return <div className={cn('group sidebar-menu')}>{children}</div>;
+const SidebarMenuContext = createContext({
+  active: false,
+});
+
+export const useSidebarMenu = () => useContext(SidebarMenuContext);
+
+export function SidebarMenu({
+  children,
+  active = false,
+}: {
+  children: React.ReactNode;
+  active?: boolean;
+}) {
+  return (
+    <SidebarMenuContext.Provider value={{ active }}>
+      <div
+        className={cn(
+          'group/sidebar-menu sidebar-menu w-full',
+          'flex items-center justify-center',
+          active && 'sidebar-menu-active'
+        )}
+      >
+        {children}
+      </div>
+    </SidebarMenuContext.Provider>
+  );
 }
 
 export function SidebarMenuContent({
@@ -63,7 +134,8 @@ export function SidebarMenuContent({
 }: {
   children: React.ReactNode;
 }) {
-  const { dock } = useSidebar();
+  const { dock, disableHover } = useSidebar();
+  const { active } = useSidebarMenu();
 
   return (
     <div
@@ -74,10 +146,16 @@ export function SidebarMenuContent({
         'w-(--sidebar-second-width)',
         'sidebar-menu-content',
         'before:w-px before:h-full before:bg-border before:absolute before:top-0 before:left-0',
-        dock && [
-          'border-border invisible opacity-0 -translate-x-10',
-          'group-hover/sidebar:visible group-hover/sidebar:opacity-100 group-hover/sidebar:-translate-x-0',
-        ]
+        !disableHover &&
+          'group-hover/sidebar-menu:visible group-hover/sidebar-menu:opacity-100 group-hover/sidebar-menu:-translate-x-0',
+        active
+          ? 'visible opacity-100 -translate-x-0'
+          : 'opacity-0 invisible -translate-x-10',
+        dock &&
+          active && [
+            'border-border invisible opacity-0 -translate-x-10',
+            'group-hover/sidebar:visible group-hover/sidebar:opacity-100 group-hover/sidebar:-translate-x-0',
+          ]
       )}
     >
       {children}
@@ -118,7 +196,9 @@ export function SidebarSubtitle({
 
 export function SidebarList({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="flex flex-col gap-0.5 mb-6 -mx-2 relative">{children}</ul>
+    <ul className="flex flex-col gap-0.5 mb-6 last:mb-0 -mx-2 relative">
+      {children}
+    </ul>
   );
 }
 
