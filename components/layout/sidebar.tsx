@@ -3,6 +3,7 @@
 import { createContext, memo, useContext } from 'react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { Slot } from '@radix-ui/react-slot';
 
 export const SidebarContext = createContext({
   dock: false,
@@ -96,11 +97,18 @@ export function SidebarTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="font-semibold text-lg">{children}</h2>;
 }
 
-export function SidebarSubtitle({ children }: { children: React.ReactNode }) {
+export function SidebarSubtitle({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
     <h3
       className={cn(
-        'font-semibold mb-2 -mx-4 px-4 text-sm text-muted-foreground'
+        'font-semibold mb-2 -mx-4 px-4 text-sm text-muted-foreground',
+        className
       )}
     >
       {children}
@@ -161,16 +169,44 @@ export function SidebarGroup({ children }: { children: React.ReactNode }) {
 
 export function SidebarItem({ children }: { children: React.ReactNode }) {
   return (
-    <button
+    <div
       className={cn(
-        'flex items-center gap-4 w-full cursor-pointer',
-        'px-4 py-2 text-white/80',
-        'hover:bg-white/5 hover:text-white',
+        'flex items-center group/sidebar-item',
         'border-b last:border-b-0',
-        'first:rounded-t-xl last:rounded-b-xl'
+        'first:rounded-t-xl last:rounded-b-xl',
+        'hover:bg-white/5 hover:text-white'
       )}
     >
       {children}
-    </button>
+    </div>
+  );
+}
+
+export function SidebarItemTrigger({
+  children,
+  asChild,
+}: {
+  children: React.ReactNode;
+  asChild?: boolean;
+}) {
+  const Component = asChild ? Slot : 'button';
+
+  return (
+    <Component
+      className={cn(
+        'flex items-center gap-4 w-full cursor-pointer',
+        'px-4 h-10 text-white/80'
+      )}
+    >
+      {children}
+    </Component>
+  );
+}
+
+export function SidebarItemAction({ children }: { children: React.ReactNode }) {
+  return (
+    <div className={cn('ml-auto pr-4 flex items-center flex-shrink-0')}>
+      {children}
+    </div>
   );
 }

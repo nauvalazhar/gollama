@@ -43,7 +43,7 @@
     --foreground: 0 0% 98%;
     --card: 235 19% 13%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 100% / 0.075;
+    --popover: 218 15% 17%;
     --popover-foreground: 0 0% 98%;
     --primary: 230 84% 52%;
     --primary-foreground: 0 0% 100%;
@@ -107,6 +107,12 @@
 
   .bg-after::after {
     @apply content-[""] absolute inset-0 -z-10 opacity-95 rounded-l-4xl border-l border-border;
+  }
+
+  .pseudo-spinner::before {
+    content: ' ';
+    background-image: url('/spinner.svg');
+    @apply size-6 bg-center bg-no-repeat;
   }
 }
 

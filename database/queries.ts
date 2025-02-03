@@ -1,5 +1,5 @@
 import { db } from './database';
-import { Chat, ChatHistoryGroup, Message } from './types';
+import { Chat, ChatHistoryGroup, Folder, Message } from './types';
 
 export function insert<T extends Record<string, unknown>>(
   table: string,
@@ -26,6 +26,24 @@ export function insertChat(chat: Chat) {
   }
 }
 
+export function insertChatFolder({
+  chatId,
+  folderId,
+}: {
+  chatId: string;
+  folderId: string;
+}) {
+  try {
+    return insert('ChatFolder', { chatId, folderId });
+  } catch (error) {
+    throw new Error(
+      `Failed to insert chat folder: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
 export function getChats() {
   try {
     const results = db
@@ -33,22 +51,25 @@ export function getChats() {
         `
           WITH ChatGroups AS (
             SELECT 
-              *,
+              c.*,
+              f.id as folderId,
+              f.name as folderName,
               CASE 
-                WHEN date(updatedAt, 'localtime') = date('now', 'localtime') THEN 'Today'
-                WHEN date(updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 'Yesterday'
-                WHEN date(updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
+                WHEN date(c.updatedAt, 'localtime') = date('now', 'localtime') THEN 'Today'
+                WHEN date(c.updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 'Yesterday'
+                WHEN date(c.updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
                   AND date('now', '-2 day', 'localtime') THEN '7 Days'
                 ELSE 'Older'
               END AS time_group,
               CASE 
-                WHEN date(updatedAt, 'localtime') = date('now', 'localtime') THEN 1
-                WHEN date(updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 2
-                WHEN date(updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
+                WHEN date(c.updatedAt, 'localtime') = date('now', 'localtime') THEN 1
+                WHEN date(c.updatedAt, 'localtime') = date('now', '-1 day', 'localtime') THEN 2
+                WHEN date(c.updatedAt, 'localtime') BETWEEN date('now', '-7 day', 'localtime') 
                   AND date('now', '-2 day', 'localtime') THEN 3
                 ELSE 4
               END AS sort_order
-            FROM Chat
+            FROM Chat c
+            LEFT JOIN Folder f ON c.folderId = f.id
           )
 
           SELECT 
@@ -59,6 +80,8 @@ export function getChats() {
                   'id', id,
                   'title', title,
                   'visibility', visibility,
+                  'folderId', folderId,
+                  'folderName', folderName,
                   'createdAt', datetime(createdAt, 'localtime'),
                   'updatedAt', datetime(updatedAt, 'localtime')
                 )
@@ -96,9 +119,19 @@ export function getChats() {
 
 export function getChat(id: string) {
   try {
-    return db.prepare('SELECT * FROM Chat WHERE id = ?').get(id) as
-      | Chat
-      | undefined;
+    return db
+      .prepare(
+        `
+      SELECT 
+        c.*,
+        f.name as folderName,
+        f.id as folderId
+      FROM Chat c
+      LEFT JOIN Folder f ON c.folderId = f.id 
+      WHERE c.id = ?
+    `
+      )
+      .get(id) as (Chat & { folderName: string; folderId: string }) | undefined;
   } catch (error) {
     console.error('Failed to get chat:', error);
     throw new Error(
@@ -121,6 +154,12 @@ export function updateChatTitle(id: string, title: string) {
 
 export function deleteChat(id: string) {
   return db.prepare('DELETE FROM Chat WHERE id = ?').run(id);
+}
+
+export function updateChatFolder(chatId: string, folderId: string) {
+  return db
+    .prepare('UPDATE Chat SET folderId = ? WHERE id = ?')
+    .run(folderId, chatId);
 }
 
 export function deleteMessagesByChatId(chatId: string) {
@@ -162,4 +201,48 @@ export function getMessagesByChatId(chatId: string) {
   return db
     .prepare('SELECT * FROM Message WHERE chatId = ?')
     .all(chatId) as Message[];
+}
+
+export function getFolderByName(name: string) {
+  return db
+    .prepare('SELECT * FROM Folder WHERE LOWER(name) = LOWER(?)')
+    .get(name) as Folder | undefined;
+}
+
+export function getFolderByChatId(chatId: string) {
+  return db
+    .prepare(
+      'SELECT * FROM Folder WHERE id = (SELECT folderId FROM Chat WHERE id = ?)'
+    )
+    .get(chatId) as Folder | undefined;
+}
+
+export function deleteFolder(id: string) {
+  return db.prepare('DELETE FROM Folder WHERE id = ?').run(id);
+}
+
+export function updateFolder(id: string, name: string) {
+  return db.prepare('UPDATE Folder SET name = ? WHERE id = ?').run(name, id);
+}
+
+export function insertFolder(folder: Folder) {
+  try {
+    return insert('Folder', folder);
+  } catch (error) {
+    throw new Error(
+      `Failed to insert folder: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+}
+
+export function getFolders({ excludeIds }: { excludeIds?: string[] } = {}) {
+  const query = excludeIds?.length
+    ? `SELECT * FROM Folder WHERE id NOT IN (${excludeIds
+        .map((id) => `'${id}'`)
+        .join(',')})`
+    : 'SELECT * FROM Folder';
+
+  return db.prepare(query).all() as Folder[];
 }

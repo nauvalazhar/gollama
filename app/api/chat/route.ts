@@ -5,6 +5,7 @@ import {
   deleteMessagesByChatId,
   getChat,
   insertChat,
+  insertChatFolder,
   insertMessage,
   insertMessages,
   updateChatDate,
@@ -42,6 +43,11 @@ export async function POST(req: Request) {
       id,
       title,
       visibility: 'public',
+    });
+
+    insertChatFolder({
+      chatId: id,
+      folderId: 'general',
     });
   } else {
     updateChatDate(id);

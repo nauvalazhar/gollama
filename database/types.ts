@@ -20,7 +20,7 @@ export type Message = {
 export type Folder = {
   id: string;
   name: string;
-  visibility: Visibility;
+  visibility?: Visibility;
   createdAt?: number;
   updatedAt?: number;
 };

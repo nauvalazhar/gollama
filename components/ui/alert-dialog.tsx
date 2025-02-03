@@ -108,11 +108,13 @@ const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
   React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> & {
     variant?: VariantProps<typeof buttonVariants>['variant'];
+    progress?: boolean;
   }
->(({ className, variant, ...props }, ref) => (
+>(({ className, variant, progress, ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={cn(buttonVariants({ variant }), className)}
+    className={cn(buttonVariants({ variant, progress }), className)}
+    disabled={progress}
     {...props}
   />
 ));

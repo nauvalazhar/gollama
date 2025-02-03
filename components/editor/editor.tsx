@@ -54,6 +54,7 @@ export function Editor({
   const editorRef = useRef<HTMLDivElement>(null);
 
   const editor = useEditor({
+    autofocus: 'end',
     immediatelyRender: false,
     extensions: [
       Markdown,

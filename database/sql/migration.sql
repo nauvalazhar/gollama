@@ -1,15 +1,10 @@
-/*
-note:
-- chat can belong to folder or not
-- folder can have many chats
-- use UUID for id so it should be unique and string
-- use timestamp for created_at and updated_at
-*/
-
 CREATE TABLE Chat (
     id TEXT PRIMARY KEY NOT NULL,
     title VARCHAR(255) NOT NULL,
     visibility TEXT NOT NULL DEFAULT 'public',
+    folderId TEXT NOT NULL DEFAULT 'general',
+    isBookmarked BOOLEAN NOT NULL DEFAULT false,
+    isArchived BOOLEAN NOT NULL DEFAULT false,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -31,20 +26,3 @@ CREATE TABLE Folder (
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- first or insert folder
--- bookmark and archived
-
-INSERT INTO Folder (id, name, visibility) 
-VALUES 
-('bookmark', 'Bookmark', 'public'),
-('archived', 'Archived', 'public')
-ON CONFLICT (id) DO NOTHING;
-
-CREATE TABLE ChatFolder (
-    chatId TEXT NOT NULL,
-    folderId TEXT NOT NULL,
-    FOREIGN KEY (chatId) REFERENCES Chat(id) ON DELETE CASCADE,
-    FOREIGN KEY (folderId) REFERENCES Folder(id) ON DELETE CASCADE
-);
-

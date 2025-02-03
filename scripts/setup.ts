@@ -1,6 +1,7 @@
 import { mkdir, access } from 'fs/promises';
 import { runMigration } from '../database/migration';
 import { DB_PATH, GOLLAMA_DIR } from '@/lib/constant';
+import { seedDatabase } from '@/database/seed';
 
 async function setupDatabase() {
   try {
@@ -12,6 +13,7 @@ async function setupDatabase() {
     }
 
     await runMigration(DB_PATH);
+    await seedDatabase(DB_PATH);
 
     console.log('✅ Database setup completed successfully');
   } catch (error) {
