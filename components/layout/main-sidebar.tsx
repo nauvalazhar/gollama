@@ -2,7 +2,6 @@
 
 import {
   Sidebar,
-  SidebarProvider,
   SidebarMenu,
   SidebarMenuList,
   SidebarTrigger,
@@ -22,8 +21,6 @@ import {
   Archive,
   Bookmark,
   Folder,
-  FolderArchive,
-  FolderHeart,
   FolderTree,
   Loader2,
   MessagesSquare,
@@ -35,7 +32,6 @@ import {
   Trash,
   X,
 } from 'lucide-react';
-import Link from 'next/link';
 import { cn, fetcher } from '@/lib/utils';
 import { Bot } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -73,6 +69,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
+import { useChatStore } from '@/components/chat/chat-store';
 
 export function MainSidebar({
   dock,
@@ -82,11 +79,14 @@ export function MainSidebar({
   handleDock: () => void;
 }) {
   const { data } = useSWR<{ folders: FolderDb[] }>('/api/chat/folder', fetcher);
-  const [folderId, setFolderId] = useState<string | undefined>();
   const [activeTab, setActiveTab] = useState<'chat' | 'folder'>('chat');
+  const setEditorFolderId = useChatStore((state) => state.setEditorFolderId);
+  const setViewFolderId = useChatStore((state) => state.setViewFolderId);
+  const viewFolderId = useChatStore((state) => state.viewFolderId);
 
   const handleFolderChange = (value: string) => {
-    setFolderId(value === 'all' ? undefined : value);
+    setViewFolderId(value);
+    setEditorFolderId(value === 'all' ? undefined : value);
   };
 
   return (
@@ -114,7 +114,7 @@ export function MainSidebar({
             </SidebarHeader>
 
             <div className="px-4 flex items-center gap-2">
-              <Select value={folderId} onValueChange={handleFolderChange}>
+              <Select value={viewFolderId} onValueChange={handleFolderChange}>
                 <SelectTrigger>
                   <div className="flex items-center gap-4">
                     <Folder className="size-4 opacity-60" />
@@ -134,7 +134,9 @@ export function MainSidebar({
 
             <div className="h-full overflow-y-auto flex flex-col px-4 py-4">
               <Suspense fallback={<div>Loading...</div>}>
-                <ChatHistory folderId={folderId} />
+                <ChatHistory
+                  folderId={viewFolderId === 'all' ? undefined : viewFolderId}
+                />
               </Suspense>
             </div>
 

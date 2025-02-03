@@ -1,6 +1,6 @@
 'use client';
 
-import { Editor } from '@/components/editor/editor';
+import { Editor } from './editor';
 import { cn } from '@/lib/utils';
 import { ChatRequestOptions } from 'ai';
 import { FormEvent, useRef, memo } from 'react';
@@ -11,6 +11,7 @@ function Form({
   setInput,
   onHeightChange,
   onEditorCreated,
+  disableFolder,
 }: {
   handleSubmit: (
     event?: {
@@ -22,6 +23,7 @@ function Form({
   setInput: (input: string) => void;
   onHeightChange: (height: number) => void;
   onEditorCreated: () => void;
+  disableFolder?: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -57,6 +59,7 @@ function Form({
           onHeightChange={onHeightChange}
           onEnter={handleEnter}
           placeholder="Ask AI anything..."
+          disableFolder={disableFolder}
         />
       </form>
     </div>

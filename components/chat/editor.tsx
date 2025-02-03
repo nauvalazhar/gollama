@@ -4,7 +4,7 @@ import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
 import Highlight from '@tiptap/extension-highlight';
-import { cn } from '@/lib/utils';
+import { cn, fetcher } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -27,15 +27,26 @@ import {
   ChevronDown,
   Pilcrow,
   Paperclip,
+  Folder,
 } from 'lucide-react';
 import { Markdown } from 'tiptap-markdown';
 import { useRef } from 'react';
 import { Kbd } from '@/components/ui/kbd';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useChatStore } from './chat-store';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
+import useSWR from 'swr';
+import { Folder as FolderDb } from '@/database/types';
 
 interface EditorProps {
   content?: string;
   placeholder?: string;
+  disableFolder?: boolean;
   onChange?: (markdown: string) => void;
   onEnter?: (event: KeyboardEvent, clear: () => void) => void;
   onHeightChange?: (height: number) => void;
@@ -49,10 +60,10 @@ export function Editor({
   onEnter,
   onHeightChange,
   onCreated,
+  disableFolder,
 }: EditorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-
   const editor = useEditor({
     autofocus: 'end',
     immediatelyRender: false,
@@ -301,6 +312,8 @@ export function Editor({
       <footer className="px-3 py-2">
         <div className="flex items-center">
           <div className="flex items-center gap-2">
+            <ChatFolder disable={!!disableFolder} />
+
             <button className="p-1 text-muted-foreground hover:text-foreground">
               <Paperclip size={20} />
             </button>
@@ -311,5 +324,35 @@ export function Editor({
         </div>
       </footer>
     </div>
+  );
+}
+
+function ChatFolder({ disable }: { disable: boolean }) {
+  const { data } = useSWR<{ folders: FolderDb[] }>('/api/chat/folder', fetcher);
+  const editorFolderId = useChatStore((state) => state.editorFolderId);
+  const setEditorFolderId = useChatStore((state) => state.setEditorFolderId);
+
+  const getFolderName = (folderId: string) => {
+    return data?.folders.find((folder) => folder.id === folderId)?.name;
+  };
+
+  return (
+    <Select
+      value={editorFolderId}
+      onValueChange={setEditorFolderId}
+      disabled={disable}
+    >
+      <SelectTrigger>
+        <Folder className="h-4 w-4 mr-2" />
+        {getFolderName(editorFolderId)}
+      </SelectTrigger>
+      <SelectContent>
+        {data?.folders.map((folder) => (
+          <SelectItem key={folder.id} value={folder.id}>
+            {folder.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

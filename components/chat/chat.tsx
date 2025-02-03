@@ -6,37 +6,45 @@ import { ChatHeader } from './chat-header';
 import { useScrollToBottom } from '@/hooks/use-scroll-to-bottom';
 import { Message } from 'ai';
 import { cn, generateUUID } from '@/lib/utils';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { ChatMessages } from '@/components/chat/chat-messages';
 import { ArrowDown, Info } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useChatStore } from './chat-store';
+import { useChatData } from '@/components/chat/chat-data';
+import { useShallow } from 'zustand/react/shallow';
 
 export function Chat({
   id,
   initialMessages,
-  title,
-  hideHeader,
 }: {
   id: string;
   initialMessages: Message[];
-  title?: string;
-  hideHeader?: boolean;
 }) {
+  const { data, error } = useChatData(id);
+
+  const { editorFolderId, viewFolderId, setChatId } = useChatStore(
+    useShallow((state) => ({
+      editorFolderId: state.editorFolderId,
+      viewFolderId: state.viewFolderId,
+      setChatId: state.setChatId,
+    }))
+  );
+
   const { mutate } = useSWRConfig();
-  const router = useRouter();
   const [chatContainerRef, endRef, isAtBottom] =
     useScrollToBottom<HTMLDivElement>();
   const pathname = usePathname();
   const [editorHeight, setEditorHeight] = useState(0);
   const [atBottomOnce, setAtBottomOnce] = useState(false);
   const [hasScroll, setHasScroll] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   const { messages, input, setInput, handleSubmit, isLoading } = useChat({
     id,
     body: {
       id,
+      folderId: editorFolderId,
     },
     initialMessages,
     generateId: generateUUID,
@@ -44,11 +52,20 @@ export function Chat({
     api: '/api/chat',
     onResponse: () => {
       if (!pathname.includes('chat')) {
-        router.push(`/chat/${id}`);
+        window.history.pushState({}, '', `/chat/${id}`);
       }
-      mutate('/api/chat/history');
+
+      if (viewFolderId == 'all') {
+        mutate(`/api/chat/history`);
+      }
+
+      mutate(`/api/chat/history?folderId=${editorFolderId}`);
     },
   });
+
+  useEffect(() => {
+    setChatId(id);
+  }, [id]);
 
   const scrollToBottom = () => {
     if (endRef.current) {
@@ -87,19 +104,13 @@ export function Chat({
         } as React.CSSProperties
       }
     >
-      {!hideHeader && (
-        <ChatHeader
-          title={title}
-          onModelChange={(value) => console.log('Model changed:', value)}
-          id={id}
-        />
-      )}
+      <ChatHeader isNewChat={initialMessages.length === 0} />
       <div
         ref={chatContainerRef}
         className={cn(
-          'overflow-y-auto h-full pt-6'
-          // shouldAnimate && 'transition-opacity duration-300',
-          // atBottomOnce ? 'opacity-100' : 'opacity-0'
+          'overflow-y-auto h-full pt-6',
+          'transition-opacity duration-300',
+          atBottomOnce ? 'opacity-100' : 'opacity-0'
         )}
       >
         <div className="flex flex-col gap-10 max-w-3xl mx-auto">
@@ -143,6 +154,7 @@ export function Chat({
         onEditorCreated={() => {
           jumpToBottom();
         }}
+        disableFolder={initialMessages.length > 0}
       />
     </section>
   );

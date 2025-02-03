@@ -4,6 +4,7 @@ export type Chat = {
   id: string;
   title: string;
   visibility: Visibility;
+  folderId: string;
   createdAt?: number;
   updatedAt?: number;
 };

@@ -62,7 +62,8 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tiptap-markdown": "^0.8.10",
-    "tsx": "^4.19.2"
+    "tsx": "^4.19.2",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

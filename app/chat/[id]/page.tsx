@@ -32,5 +32,5 @@ export default async function ChatPage({
   const messages = await getMessagesByChatId(id);
   const uiMessages = convertMessagesToUi(messages);
 
-  return <Chat id={id} initialMessages={uiMessages} title={chat.title} />;
+  return <Chat id={id} initialMessages={uiMessages} />;
 }

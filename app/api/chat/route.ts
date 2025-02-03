@@ -21,9 +21,11 @@ const model = ollama('llama3.2');
 export async function POST(req: Request) {
   const {
     id,
+    folderId,
     messages,
   }: {
     id: string;
+    folderId: string;
     messages: Message[];
   } = await req.json();
 
@@ -43,11 +45,7 @@ export async function POST(req: Request) {
       id,
       title,
       visibility: 'public',
-    });
-
-    insertChatFolder({
-      chatId: id,
-      folderId: 'general',
+      folderId: folderId || 'general',
     });
   } else {
     updateChatDate(id);

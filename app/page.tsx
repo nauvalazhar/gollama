@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 export default function Page() {
   const id = generateUUID();
 
-  return <Chat id={id} key={id} initialMessages={[]} hideHeader />;
+  return <Chat id={id} key={id} initialMessages={[]} />;
 }
