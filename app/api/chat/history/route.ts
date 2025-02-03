@@ -1,12 +1,11 @@
 import { getChats } from '@/database/queries';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
-  const chats = getChats();
+export async function GET(req: NextRequest) {
+  const params = req.nextUrl.searchParams;
+  const folderId = params.get('folderId');
 
-  if (chats.length === 0) {
-    return NextResponse.json({ error: 'No chats found' }, { status: 404 });
-  }
+  const chats = getChats(folderId ?? undefined);
 
   return NextResponse.json(chats);
 }

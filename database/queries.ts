@@ -44,8 +44,14 @@ export function insertChatFolder({
   }
 }
 
-export function getChats() {
+export function getChats(folderId?: string) {
   try {
+    let whereClause = '';
+
+    if (folderId) {
+      whereClause = 'WHERE c.folderId = ?';
+    }
+
     const results = db
       .prepare(
         `
@@ -70,6 +76,7 @@ export function getChats() {
               END AS sort_order
             FROM Chat c
             LEFT JOIN Folder f ON c.folderId = f.id
+            ${whereClause}
           )
 
           SELECT 
@@ -98,7 +105,7 @@ export function getChats() {
           ORDER BY sort_order;
         `
       )
-      .all() as {
+      .all(folderId ? [folderId] : []) as {
       date: string;
       chats: string;
     }[];
